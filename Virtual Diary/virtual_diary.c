@@ -38,7 +38,7 @@ void handle_back(GtkWidget *widget, gpointer diary_window) {
 }
 
 
-// css style 
+// Complete updated CSS data
 const char *css_data = "\
     /* Login window with original style */\
     .login-window {\
@@ -158,46 +158,50 @@ const char *css_data = "\
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);\
     }\
     \
+    /* Modified button colors */\
     .save-button {\
-        background-image: linear-gradient(45deg, #ff7eb3 0%, #ff758c 100%);\
+        background-image: linear-gradient(45deg, #43c6ac 0%, #81fa74 100%);\
+        color: #333333;\
     }\
     \
     .save-button:hover {\
-        background-image: linear-gradient(45deg, #ff758c 0%, #ff7eb3 100%);\
+        background-image: linear-gradient(45deg, #81fa74 0%, #43c6ac 100%);\
     }\
     \
     .show-button {\
-        background-image: linear-gradient(45deg, #7f7fd5 0%, #86a8e7 50%, #91eae4 100%);\
+        background-image: linear-gradient(45deg, #6a82fb 0%, #bc9bff 100%);\
+        color: #ffffff;\
     }\
     \
     .show-button:hover {\
-        background-image: linear-gradient(45deg, #91eae4 0%, #86a8e7 50%, #7f7fd5 100%);\
+        background-image: linear-gradient(45deg, #bc9bff 0%, #6a82fb 100%);\
     }\
     \
     .logout-button {\
-        background-image: linear-gradient(45deg, #f857a6 0%, #ff5858 100%);\
+        background-image: linear-gradient(45deg, #ff8008 0%, #ffc837 100%);\
+        color: #333333;\
     }\
     \
     .logout-button:hover {\
-        background-image: linear-gradient(45deg, #ff5858 0%, #f857a6 100%);\
+        background-image: linear-gradient(45deg, #ffc837 0%, #ff8008 100%);\
     }\
     \
-    .back-button {\
-        background-image: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);\
+    .delete-account-button {\
+        background-image: linear-gradient(45deg, #ff416c 0%, #ff4b2b 100%);\
+        color: #ffffff;\
     }\
     \
-    .back-button:hover {\
-        background-image: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);\
+    .delete-account-button:hover {\
+        background-image: linear-gradient(45deg, #ff4b2b 0%, #ff416c 100%);\
     }";
-// Function to apply CSS
-void apply_css(void) {
-    GtkCssProvider *provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(provider, css_data, -1, NULL);
-    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-                                            GTK_STYLE_PROVIDER(provider),
-                                            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    g_object_unref(provider);
-}
+    void apply_css(void) {
+        GtkCssProvider *provider = gtk_css_provider_new();
+        gtk_css_provider_load_from_data(provider, css_data, -1, NULL);
+        gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+                                                GTK_STYLE_PROVIDER(provider),
+                                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        g_object_unref(provider);
+    }
 // Function to validate username
 int validate_username(const char *username) {
     if (!username || strlen(username) == 0 || strlen(username) >= MAX_USERNAME_LENGTH) {
@@ -551,7 +555,7 @@ void show_entries(GtkWidget *widget, gpointer window) {
     gtk_widget_destroy(dialog);
 }
 //handle_logout function with confirmation dialog
-void handle_logout(GtkWidget *widget, gpointer diary_window) {
+void handle_delete_account(GtkWidget *widget, gpointer diary_window) {
     if (strlen(current_user) == 0) {
         g_print("Error: No user logged in.\n");
         return;
@@ -562,14 +566,14 @@ void handle_logout(GtkWidget *widget, gpointer diary_window) {
         GTK_DIALOG_MODAL,
         GTK_MESSAGE_WARNING,
         GTK_BUTTONS_OK_CANCEL,
-        "Warning: Logging out will delete all your saved information!\n\nDo you want to proceed?");
+        "Warning: Deleting your account will remove all your saved information!\n\nDo you want to proceed?");
     
     gtk_window_set_default_size(GTK_WINDOW(dialog), 400, 200);
     int response = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 
     if (response == GTK_RESPONSE_OK) {
-        // Delete user data on logout
+        // Delete user data
         delete_user_data(current_user);
 
         // Clear the current user
@@ -577,14 +581,13 @@ void handle_logout(GtkWidget *widget, gpointer diary_window) {
 
         g_signal_handlers_disconnect_by_func(diary_window, G_CALLBACK(gtk_main_quit), NULL);
 
-
         // Destroy the diary window
         gtk_widget_destroy(GTK_WIDGET(diary_window));
 
         // Create and show new login window
         create_login_window();
         
-        g_print("User logged out successfully.\n");
+        g_print("User account deleted successfully.\n");
     }
     // If response is CANCEL, do nothing and return to diary window
 }
@@ -648,6 +651,7 @@ void create_login_window() {
 }
 
 //open_diary with styling
+// Complete updated open_diary function
 void open_diary(GtkWidget *widget, gpointer data) {
     GtkWidget *diary_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(diary_window), "My Digital Diary");
@@ -663,33 +667,33 @@ void open_diary(GtkWidget *widget, gpointer data) {
     gtk_widget_set_size_request(scrolled_window, 780, 450);
     gtk_container_add(GTK_CONTAINER(scrolled_window), text_view);
 
-    // Create buttons with style classes
+    // Create buttons with updated labels and style classes
     GtkWidget *save_button = gtk_button_new_with_label("Save Entry");
     GtkWidget *show_button = gtk_button_new_with_label("Show Entries");
-    GtkWidget *logout_button = gtk_button_new_with_label("Logout");
-    GtkWidget *back_button = gtk_button_new_with_label("Back to Login");
+    GtkWidget *logout_button = gtk_button_new_with_label("Logout");          // Changed from "Back to Login"
+    GtkWidget *delete_account_button = gtk_button_new_with_label("Delete Account"); // Changed from "Logout"
 
     // Add style classes to buttons
     gtk_style_context_add_class(gtk_widget_get_style_context(save_button), "save-button");
     gtk_style_context_add_class(gtk_widget_get_style_context(show_button), "show-button");
     gtk_style_context_add_class(gtk_widget_get_style_context(logout_button), "logout-button");
-    gtk_style_context_add_class(gtk_widget_get_style_context(back_button), "back-button");
+    gtk_style_context_add_class(gtk_widget_get_style_context(delete_account_button), "delete-account-button");
 
     gtk_widget_set_size_request(save_button, 150, 50);
     gtk_widget_set_size_request(show_button, 150, 50);
     gtk_widget_set_size_request(logout_button, 150, 50);
-    gtk_widget_set_size_request(back_button, 150, 50);
+    gtk_widget_set_size_request(delete_account_button, 150, 50);
 
     GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
     gtk_box_pack_start(GTK_BOX(button_box), save_button, TRUE, TRUE, 10);
     gtk_box_pack_start(GTK_BOX(button_box), show_button, TRUE, TRUE, 10);
-    gtk_box_pack_start(GTK_BOX(button_box), back_button, TRUE, TRUE, 10);
     gtk_box_pack_start(GTK_BOX(button_box), logout_button, TRUE, TRUE, 10);
+    gtk_box_pack_start(GTK_BOX(button_box), delete_account_button, TRUE, TRUE, 10);
 
     g_signal_connect(save_button, "clicked", G_CALLBACK(save_entry), text_view);
     g_signal_connect(show_button, "clicked", G_CALLBACK(show_entries), diary_window);
-    g_signal_connect(logout_button, "clicked", G_CALLBACK(handle_logout), diary_window);
-    g_signal_connect(back_button, "clicked", G_CALLBACK(handle_back), diary_window);
+    g_signal_connect(logout_button, "clicked", G_CALLBACK(handle_back), diary_window);      // Same function as before
+    g_signal_connect(delete_account_button, "clicked", G_CALLBACK(handle_delete_account), diary_window); // Using renamed function
 
     GtkWidget *content_area = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     gtk_container_set_border_width(GTK_CONTAINER(content_area), 20);
